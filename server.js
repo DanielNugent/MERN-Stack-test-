@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-
+const passport = require('passport');
 const users = require('./routes/api/users');
 const profile = require('./routes/api/profile');
 
@@ -16,8 +16,12 @@ mongoose.connect(db, {useNewUrlParser: true, useUnifiedTopology: true})
 .then(() => console.log('Connected to DB!'))
 .catch((err) => console.log(err));
 
+//Passport setup with middleware
+app.use(passport.initialize());
 
-app.get("/", (req, res) => res.send("Hello"));
+//Passport Configuration - JWT strategy
+require('./config/passport')(passport);
+
 //Routes
 app.use('/api/users', users);
 app.use('/api/profile', profile);
