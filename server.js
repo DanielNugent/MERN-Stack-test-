@@ -26,6 +26,5 @@ require('./config/passport')(passport);
 app.use('/api/users', users);
 app.use('/api/profile', profile);
 
-
 const port = process.env.PORT || 5000;
-app.listen(port, () => console.log(`On port ${port}`));
+app.listen(port);

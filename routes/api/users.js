@@ -97,15 +97,16 @@ router.post("/login", (req, res) => {
     });
   });
 });
-//LOGIN
+//USER
 // @route    POST api/users/user
-// @desc     Return current user
+// @desc     Return current user information
 // @access   Private
 router.get(
   "/user",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    res.json(req.user);
+    const {first_name, last_name, email, avatar} = req.user;
+    res.json({first_name, last_name, email, avatar});
   }
 );
 
