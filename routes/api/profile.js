@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const mongoose = require("mongoose");
-
+const validateProfileFields = require("../../validation/profile");
 //Bring in User and Profile models
 const User = require("../../models/User");
 const Profile = require("../../models/Profile");
@@ -22,6 +22,7 @@ router.get(
   (req, res) => {
     const errors = {};
     Profile.findOne({ user: req.user.id })
+      .populate('user', ['first_name', 'last_name', 'avatar'])
       .then(profile => {
         if (!profile) {
           errors.noprofile = "No profile for specified user";
@@ -43,6 +44,11 @@ router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
+    const { errors, isValid } = validateProfileFields(req.body);
+    if (!isValid) {
+      return res.status(400).json(errors);
+    }
+
     const profileFields = {};
     profileFields.user = req.user.id;
     if (req.body.handle) profileFields.handle = req.body.handle;
@@ -50,15 +56,13 @@ router.post(
     if (req.body.degree) profileFields.degree = req.body.degree;
     if (req.body.year) profileFields.year = req.body.year;
     if (req.body.website) profileFields.website = req.body.website;
+    if (req.body.bio) profileFields.bio = req.body.bio;
     if (req.body.location) profileFields.location = req.body.location;
     if (req.body.githubusername)
       profileFields.githubusername = req.body.githubusername;
     if (typeof req.body.skills !== "undefined") {
       profileFields.skills = req.body.skills.split(",");
     }
-    if (req.body.bio) profileFields.bio = req.body.bio;
-
-    const errors = {};
     Profile.findOne({ user: req.user.id }).then(profile => {
       if (profile) {
         //Update existing profile
