@@ -76,21 +76,21 @@ const ProfileSchema = new Schema({
   connections: [
     {
       type: Schema.Types.ObjectId,
-      ref: "users"
+      ref: "profile"
     }
   ],
   incomingrequests: [
     {
       type: Schema.Types.ObjectId,
-      ref: "users"
+      ref: "profile"
     }
   ],
   outgoingrequests: [
     {
       type: Schema.Types.ObjectId,
-      ref: "users"
+      ref: "profile"
     }
-  ],
+  ]
 });
 
 module.exports = Profile = mongoose.model("profile", ProfileSchema);

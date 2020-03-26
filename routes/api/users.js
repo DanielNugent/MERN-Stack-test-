@@ -105,8 +105,8 @@ router.get(
   "/user",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    const {first_name, last_name, email, avatar} = req.user;
-    res.json({first_name, last_name, email, avatar});
+    const {first_name, last_name, email, avatar, outgoingrequests, incomingrequests} = req.user;
+    res.json({first_name, last_name, email, avatar, outgoingrequests, incomingrequests});
   }
 );
 
