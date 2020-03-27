@@ -144,10 +144,63 @@ router.post(
           return res.status(404).json(errors);
         }
         Profile.findOne({ handle: req.body.handle }).then(connection => {
+          if (!connection) {
+            errors.noprofile = "No profile";
+            res.status(404).json(errors);
+          }
+          if(profile.outgoingrequests.includes(connection.user)){
+            console.log("already sending!");
+            return res.status(400).json({profile: "already waiting for connection request!"});
+          }
           profile.outgoingrequests.unshift(connection.user);
           profile.save().then(() => {
             connection.incomingrequests.unshift(profile.user);
-            connection.save().then(connection => res.json({mes: 'success'}));
+            connection.save().then(connection => res.json({ message: "success" }));
+          });
+        });
+      })
+      .catch(err => {
+        res.status(404).json(err);
+      });
+  }
+);
+//PROFILE
+// @route    POST api/profile/connections/accept
+// @desc     Add a new connection (request)
+// @access   Private
+router.post(
+  "/connections/accept",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    const errors = {};
+    Profile.findOne({ user: req.user.id })
+      .then(profile => {
+        if (!profile) {
+          errors.noprofile = "No profile for specified user";
+          return res.status(404).json(errors);
+        }
+        Profile.findOne({ user: req.body.id }).then(connection => {
+          if (!connection) {
+            errors.noprofile = "No profile";
+            res.status(404).json(errors);
+          }
+          profile.incomingrequests = profile.incomingrequests.filter(
+            increq => toString(increq) != toString(req.body.id)
+          );
+          profile.outgoingrequests = profile.outgoingrequests.filter(
+            outreq => toString(outreq) != toString(req.body.id)
+          );
+          connection.outgoingrequests = connection.outgoingrequests.filter(
+            outreq => toString(outreq) != toString(profile.user)
+          );
+          connection.incomingrequests = connection.incomingrequests.filter(
+            increq => toString(increq) != toString(profile.user)
+          );
+  //        console.log(toString(profile.user).localCompare(connection.incomingrequests[0]));
+          connection.connections = [];
+          profile.connections = [];
+          profile.save().then(() => {
+            connection.save().then(connection => res.json(profile));
           });
         });
       })
